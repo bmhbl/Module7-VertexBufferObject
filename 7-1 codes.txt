@@ -1,0 +1,108 @@
+//#define GLEW_STATIC
+#include<iostream>
+#include<thread>
+#include<GL/glew.h>
+#include<GL/freeglut.h>
+
+using namespace std;
+
+void display();
+void triangle();
+
+
+int main(int argc, char** argv) {
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowPosition(100, 100); //Pixel Position
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Module 6");
+    glutDisplayFunc(display);
+
+    GLenum err = glewInit();
+    if (err == GLEW_OK)
+        glutMainLoop();
+    else
+    {
+        cout << "unable to initilize";
+    }
+
+}
+
+void triangle() {
+
+    GLfloat trianglevertices[] = {
+        0.0f, .75f,
+        -0.75f, 0.0f,
+        0.75f,0.0f,
+
+        -0.75f, -0.75f,
+        0.0f, 0.0f,
+        0.75f, -0.75f
+
+    };
+
+    GLfloat colorvertices[] = {
+        1.0f,0.0f,0.0f,
+        1.0f,0.0f,0.0f,
+        1.0f,0.0f,0.0f,
+
+        0.0f,1.0f,0.0f,
+        0.0f,1.0f,0.0f,
+        0.0f,1.0f,0.0f,
+
+    };
+
+    GLubyte triangleindices[] = {
+        0,1,2,3,4,5,0,5
+    };
+
+    GLuint VBOid;
+    glGenBuffers(1, &VBOid);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOid);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, trianglevertices, GL_STATIC_DRAW);
+    glVertexPointer(2, GL_FLOAT, 0, 0);//last 0 means it will get the data from the video card.  This also describe your vertices
+
+    GLuint vindices;
+    glGenBuffers(1, &vindices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vindices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte) * 8, triangleindices, GL_STATIC_DRAW);
+    glNormalPointer(GL_UNSIGNED_BYTE, 0, 0);//describes the pointers
+
+    GLuint vcolors;
+    glGenBuffers(1, &vcolors);
+    glBindBuffer(GL_ARRAY_BUFFER, vcolors);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 18, colorvertices, GL_STATIC_DRAW);
+    glColorPointer(3, GL_FLOAT, 0, 0); // this describes the color pointer
+
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0); //this draws the triangle
+
+    glDrawElements(GL_LINES, 2, GL_UNSIGNED_BYTE, (void*)(sizeof(GLubyte) * 6)); //this draws the lines
+
+
+    //when working with vertex_buffer_objects, deallocation it from the memory
+    glBindBuffer(GL_ARRAY_BUFFER, 0); //this line switches back to normal pointer operation
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDeleteBuffers(1, &VBOid);
+    glDeleteBuffers(1, &vindices);
+    glDeleteBuffers(1, &vcolors);
+}
+
+
+void display() {
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
+    triangle();
+    //do more figure
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glutSwapBuffers();
+}
